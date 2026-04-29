@@ -1,0 +1,71 @@
+services:
+  api:
+    image: botgpt-app:latest
+    build: .
+    container_name: botgpt-api
+    env_file: .env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_started
+      ollama-pull:
+        condition: service_completed_successfully
+
+  ui:
+    image: botgpt-app:latest
+    container_name: botgpt-ui
+    env_file: .env
+    command: streamlit run ui/streamlit_app.py --server.port=${UI_PORT:-8501} --server.address=0.0.0.0
+    ports:
+      - "${UI_PORT:-8501}:${UI_PORT:-8501}"
+    depends_on:
+      - api
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: botgpt-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-botgpt}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: botgpt-ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: botgpt-ollama-pull
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_PULL_MODEL: ${OLLAMA_PULL_MODEL:-qwen3:1.7b}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for Ollama API..."
+        for i in $(seq 1 120); do
+          if ollama list >/dev/null 2>&1; then
+            break
+          fi
+          sleep 2
+        done
+        echo "Pulling model: $${OLLAMA_PULL_MODEL}"
+        ollama pull "$${OLLAMA_PULL_MODEL}"
+        echo "Model pull completed."
+    restart: "no"
+
+volumes:
+  pgdata:
+  ollama_data:

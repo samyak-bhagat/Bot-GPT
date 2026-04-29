@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bot-gpt-backend"
+version = "0.1.0"
+description = "Case study scaffold for BOT GPT conversational backend"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.30.0",
+  "pydantic>=2.8.0",
+  "pydantic-settings>=2.4.0",
+  "langgraph>=0.2.0",
+  "langchain-core>=0.3.0",
+  "langchain-groq>=0.2.0",
+  "langchain-openai>=0.2.0",
+  "langchain-ollama>=0.2.0",
+  "langchain-huggingface>=0.1.0",
+  "sqlalchemy>=2.0.0",
+  "psycopg[binary]>=3.2.0",
+  "streamlit>=1.38.0",
+  "python-multipart>=0.0.9",
+  "sentence-transformers>=3.0.0",
+  "pypdf>=5.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.6.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.setuptools]
+packages = ["app"]
