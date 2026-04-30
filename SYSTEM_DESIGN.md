@@ -129,57 +129,61 @@ erDiagram
     conversations ||--o{ conversation_documents : grounded_in
     documents ||--o{ conversation_documents : referenced_by
     documents ||--o{ document_chunks : split_into
-    document_chunks ||--o{ document_chunks : "parent_summary (self-FK, nullable)"
+    document_chunks ||--o{ document_chunks : parent_summary
 
     users {
         uuid id PK
-        string email "unique, indexed"
+        string email
         timestamptz created_at
     }
+
     conversations {
         uuid id PK
-        uuid user_id FK "ON DELETE CASCADE"
+        uuid user_id FK
         string title
-        string mode "open | rag"
+        string mode
         int total_tokens
-        numeric(12,6) total_cost_usd "LLM only"
+        float total_cost_usd
         timestamptz created_at
-        timestamptz updated_at "ON UPDATE now()"
+        timestamptz updated_at
     }
+
     messages {
-        int id PK "autoincrement"
-        uuid conversation_id FK "ON DELETE CASCADE"
-        string role "user | assistant | system"
+        int id PK
+        uuid conversation_id FK
+        string role
         text content
         int prompt_tokens
         int completion_tokens
-        numeric(12,6) cost_usd "per-message; reserved"
+        float cost_usd
         string model
         timestamptz created_at
     }
+
     documents {
         uuid id PK
-        uuid user_id FK "ON DELETE CASCADE"
+        uuid user_id FK
         string filename
-        string status "processing | ready | failed"
+        string status
         int chunk_count
         timestamptz created_at
     }
+
     document_chunks {
         uuid id PK
-        uuid document_id FK "ON DELETE CASCADE"
-        uuid parent_summary_id "self-FK; ON DELETE SET NULL"
+        uuid document_id FK
+        uuid parent_summary_id
         int chunk_index
         text content
-        json metadata "embedding, embedding_provider, embedding_model, approx_input_tokens, estimated_cost_usd"
+        json metadata
         timestamptz created_at
     }
+
     conversation_documents {
-        uuid conversation_id PK_FK
-        uuid document_id PK_FK
+        uuid conversation_id PK
+        uuid document_id PK
         timestamptz created_at
-    }
-```
+    }```
 
 The mapping is in `app/db/models.py`. Notable choices:
 
