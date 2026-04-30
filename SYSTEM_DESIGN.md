@@ -183,7 +183,8 @@ erDiagram
         uuid conversation_id PK
         uuid document_id PK
         timestamptz created_at
-    }```
+    }
+```
 
 The mapping is in `app/db/models.py`. Notable choices:
 
